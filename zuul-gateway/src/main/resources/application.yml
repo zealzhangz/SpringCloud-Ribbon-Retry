@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: zuul-gateway
+
+eureka:
+   instance:
+     hostname: localhost
+   client:
+     register-with-eureka: false
+     fetch-registry: true
+     service-url:
+       defaultZone: http://${eureka.instance.hostname}:7001/eureka/
+
+zuul:
+  routes:
+    skytsdb:
+      path: /**
+      serviceId: service-provide
+      retryable: true
+
+#负载均衡规则，根据ServiceID设置
+service-provide:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.AvailabilityFilteringRule
+    MaxAutoRetries: 0           # Max number of retries on the same server (excluding the first try)
+    MaxAutoRetriesNextServer: 3 # Max number of next servers to retry (excluding the first server)
+    OkToRetryOnAllOperations: true
