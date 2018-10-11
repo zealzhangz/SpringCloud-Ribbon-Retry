@@ -1,16 +1,16 @@
 # 背景
 微服务通常都要求高可靠性，光靠前面介绍的[Load Balance Rule](https://www.zhangaoo.com/article/ribbon#directory092092130743566310)还不能完全解决我们的问题。如下图：
 
-1. 当请求还在`1`处时，此时如果`Service3`服务不可用了，Gateway中的Ribbon如果使用的`BestAvailableRule`，`AvailabilityFilteringRule`等`Load Balance Rule`的话可以剔除不可用的`Service3`服务，这种情况服务不会出错。
+1. 当请求还在`1`处时，此时如果`Service3`服务不可用了，`Gateway` 中的` Ribbon` 如果使用的`BestAvailableRule`，`AvailabilityFilteringRule`等`Load Balance Rule`的话可以剔除不可用的`Service3`服务，这种情况服务不会出错。
 2. 但是当请求已经经由`Gateway`转发已经到达了`4`处时，如果只配置`Load Balance Rule`的话已经无能为力了，因为`Load Balance Rule`只是做`Server`的选择，此时已经选定`Service3`，这种情况就会导致本次调用出错。
 3. 如果我们配置使用了`Ribbon`的`Retry`策略的话，即使请求已经到达`4`处，并且本次会请求失败，但是在请求失败后可以根据策略进行一次或多次`Retry`，尝试的机制则可以最大限度的规避这种特殊情况的服务不可用用的情况
 
-![alt](https://www.zhangaoo.com/upload/2018/10/tjho2efet4g40o38toat0d2s5i.jpg)
+![alt](./lb-failed.jpg)
 
 # 配置使用Retry策略
 基本架构如下：
-1. 一个Eureka(非集群模式，集群模式配置有差异)
-2. 一个网关（Gateway）反向代理服务，ribbon做`LB Rule`，`Retry`模块做失败请求`Retry`;网关从Eureka发现服务并反向代理；
+1. 一个 `Eureka` (非集群模式，集群模式配置有差异)
+2. 一个网关（`Gateway`）反向代理服务，ribbon做`LB Rule`，`Retry`模块做失败请求`Retry`;网关从`Eureka`发现服务并反向代理；
 3. 三个服务节点，把服务注册到`Eureka`
 
 # 配置注意点
@@ -74,7 +74,7 @@ zuul:
       serviceId: service-provide
       retryable: true
 
-#负载均衡规则，根据ServiceID设置
+#负载均衡规则，根据ServiceID设置，重点就是这几行配置
 service-provide:
   ribbon:
     NFLoadBalancerRuleClassName: com.netflix.loadbalancer.AvailabilityFilteringRule
